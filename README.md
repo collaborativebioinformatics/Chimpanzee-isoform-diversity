@@ -1,7 +1,7 @@
 # **IsoChimp: Population-scale isoform diversity exploration in chimpanzee**
 
 <p align="center">
-  <img src="images/IsoChimp_logo.png" alt="IsoChimp Logo" width="300">
+  <img src="images/IsoChimp.png" alt="IsoChimp Logo" width="300">
 </p>
 
 ## **Motivation**
