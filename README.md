@@ -1,4 +1,4 @@
-# **Population-scale isoform diversity exploration in chimpanzee**
+# **IsoChimp: Population-scale isoform diversity exploration in chimpanzee**
 
 ## **Motivation**
 
