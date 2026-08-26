@@ -1,5 +1,9 @@
 # **IsoChimp: Population-scale isoform diversity exploration in chimpanzee**
 
+<p align="center">
+  <img src="images/IsoChimp_logo.png" alt="IsoChimp Logo" width="300">
+</p>
+
 ## **Motivation**
 
 The chimpanzee (*Pan troglodytes*) is a key species for comparative and evolutionary genomics, but its transcriptome annotation is fragmented across providers — NCBI RefSeq, Ensembl, and others — each with its own gene models, identifiers, and inclusion criteria. No systematic comparison of these resources currently exists, there is no way to ask a basic question about any chimpanzee transcript — **how common is it across individuals?** — and there is no transcript-level correspondence to the human annotation on the current chimpanzee assembly.
