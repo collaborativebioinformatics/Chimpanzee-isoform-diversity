@@ -50,11 +50,33 @@ All work is anchored to a single assembly to avoid coordinate mismatches:
 * Reference genome FASTA and chromAlias table (above)  
 * `isomatch` — https://github.com/zhengxinchang/isomatch
 
-**Steps**
+**Steps.**
 
-1. Normalise sequence names in both GTFs and in the genome FASTA to the project convention using the chromAlias table.  
-2. Merge with `isomatch`, treating each annotation source as a tracked sample.  
-3. Summarise the merge: transcripts unique to each source, shared transcripts, and the nature of the disagreements (exact intron-chain match vs. shared structure with different transcript boundaries).
+1. **Download the inputs**  
+   1. NCBI RefSeq GTF  
+   2. Ensembl GTF  
+   3. Chimpanzee reference genome FASTA  
+   4. `chromAlias` table  
+2. **Standardize chromosome names**  
+   1. Normalize chromosome names in both GTFs and the reference genome to the same convention.  
+   2. Use **Ensembl-style chromosome names** (e.g. `1`, `2`, `X`, without the `chr` prefix).  
+   3. Use the `chromAlias` table when necessary to map RefSeq/GenBank/UCSC chromosome names.  
+3. **Merge the two annotations with IsoMatch**  
+   1. Run the IsoMatch `merge` function using the two normalized GTFs and the normalized reference genome.  
+   2. Keep RefSeq and Ensembl as separate tracked sources.  
+   3. The merged GTF should contain provenance information such as `ISOM_SRC` and other IsoMatch attributes.  
+4. **Parse the merged GTF and summarize annotation overlap**  
+   Calculate at least:  
+   1. Total number of transcripts in RefSeq and Ensembl  
+   2. Number of **mono-exon** and **multi-exon** transcripts in each annotation  
+   3. Number and percentage of transcripts **shared between RefSeq and Ensembl**  
+   4. Number of transcripts **unique to RefSeq**  
+   5. Number of transcripts **unique to Ensembl**  
+   6. If possible, distinguish **exact intron-chain matches** from transcripts with the same splice structure but different transcript boundaries.  
+5. **Generate summary outputs**  
+   1. A unified chimpanzee annotation GTF with source provenance  
+   2. A small summary table of transcript counts and overlap  
+   3. An **UpSet plot or Venn diagram** showing RefSeq/Ensembl shared and unique transcripts
 
 **Output**
 
@@ -73,12 +95,39 @@ All work is anchored to a single assembly to avoid coordinate mismatches:
 * Reference genome, normalised as above  
 * `isopedia` — https://github.com/zhengxinchang/isopedia
 
-**Steps**
 
-1. Assemble the run accession list with sample metadata (tissue, individual, platform, library protocol).  
-2. Align reads to the reference assembly.  
-3. Build the `isopedia` index over the aligned reads, retaining per-sample provenance.  
-4. Validate with a query round-trip: take transcripts from the goal 1 unified set and confirm the index returns sensible support counts and sample lists.
+**Steps.**
+
+1. **Curate chimpanzee long-read RNA-seq datasets**  
+   1. Combine SRA run information with sample metadata.  
+   2. Identify tissue, individual, platform, and library type.  
+   3. Filter out unsuitable runs, including raw PacBio subreads when processed reads are available, datasets without usable transcript reads, and targeted experiments.  
+   4. Generate the final SRR list and a QC/audit table.  
+2. **Current result: 17 suitable samples identified.**  
+3. **Prepare the reference**  
+   1. Normalize chromosome names in the chimpanzee genome and GTF to the same convention.  
+   2. Build the required `samtools` and `minimap2` indexes.  
+4. **Download and align the selected runs**  
+   1. Download FASTQ files for the approved SRR accessions.  
+   2. Verify downloads with MD5 checksums.  
+   3. Align reads to the normalized chimpanzee genome with splice-aware `minimap2`.  
+   4. Sort/index BAM files and merge runs belonging to the same BioSample.  
+   5. Calculate basic alignment QC, including mapped reads and mapping rate.  
+5. **Build the Isopedia index**  
+   1. Build a population-scale `isopedia` index from the cleaned BAM files while retaining sample provenance.  
+6. **Query transcript set**   
+   1. Use the unified chimpanzee GTF from Goal 1 as the query or use ENSEMBL gene.gtfs as an anternative.  
+   2. Summarize transcript support, including:  
+      1. Supporting reads  
+      2. Supporting samples  
+      3. Population frequency  
+      4. Sample IDs  
+7. **Generate summary outputs**  
+   1. Curated sample metadata and inclusion/exclusion table  
+   2. QCed BAM files  
+   3. Chimpanzee `isopedia` population index  
+   4. Goal 1 transcripts annotated with population support  
+   5. Basic population-frequency and sample-support statistics
 
 **Output**
 
@@ -89,157 +138,64 @@ All work is anchored to a single assembly to avoid coordinate mismatches:
 
 ## Goal 3 — Human–chimpanzee transcript correspondence (gene-anchored)
 
-**Goal:** Establish a transcript-level correspondence between the human reference annotation and the chimpanzee transcript set on NHGRI\_mPanTro3-v2.1\_pri, so that human and chimpanzee isoforms can be compared directly.
+**Goal**
 
-No precomputed transcript-level mapping is usable here (TOGA and UCSC chains target panTro6 / Clint\_PTRv2). However, gene-level orthology *is* available: NCBI's annotation pipeline assigns human orthologs to the RefSeq annotation of GCF\_028858775.2. The strategy is therefore two-stage: first fix the correspondence at the gene level, then compare transcript structures within each orthologous gene pair.
+Establish a **transcript-level correspondence between human and chimpanzee isoforms** on `NHGRI_mPanTro3-v2.1_pri`.
 
-**Approach:** Stage 1 (gene projection): anchor each human gene to its chimpanzee ortholog using the NCBI RefSeq ortholog assignments (harmonised GeneIDs / gene symbols), classifying pairs as 1:1, 1:many, or unassigned. For unassigned human genes, fall back to Liftoff to propose a candidate locus, flagged as projection-by-lift (lower confidence). Stage 2 (within-gene transcript comparison): splice-align the human transcript sequences of each gene onto its chimpanzee ortholog locus, convert the alignments to exon models in chimpanzee coordinates, and match them against the goal 1 unified chimpanzee transcripts at that locus using the same intron-chain logic (isomatch). Intron-chain identity is the primary criterion; cDNA alignment identity and coverage are recorded as supporting statistics, since sequence identity alone cannot distinguish splice-structure differences.
-
-Because every alignment is confined to a pre-established ortholog locus, paralog mis-mapping is excluded by construction, and every failure is attributable to a specific cause (no ortholog gene, unalignable transcript, or structural divergence).
+The analysis is **gene-anchored**: first identify the corresponding chimpanzee gene/locus for each human gene, then compare transcript structures within that locus. Splice-structure similarity is the primary criterion, while sequence identity and coverage are used as supporting information.
 
 **Input**
 
-* Human reference annotation (GENCODE comprehensive GTF) and GRCh38 primary assembly FASTA: [https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode\_human/latest\_release/](https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/latest_release/)  
-* NCBI RefSeq annotation and gene-level ortholog assignments for GCF\_028858775.2 (via NCBI Datasets ortholog query); GENCODE↔GeneID cross-references  
-* Chimpanzee reference genome FASTA, normalised as above  
-* Unified chimpanzee transcript set from goal 1  
-* gffread, minimap2, Liftoff (fallback only), isomatch
+* Human GENCODE comprehensive GTF and GRCh38 reference genome  
+* NCBI human–chimpanzee gene orthology assignments  
+* Normalized chimpanzee reference genome  
+* Unified chimpanzee transcript annotation from **Goal 1**  
+* `gffread`  
+* `minimap2`  
+* `Liftoff` — fallback for genes without an NCBI ortholog  
+* `isomatch`  
+* `BBSketch` or similar tool — optional conservation screen
 
 **Steps**
 
-1. Build the gene projection table: human GeneID ↔ chimpanzee GeneID from NCBI orthologs; map GENCODE gene IDs to Entrez GeneIDs; classify each human gene as 1:1, 1:many, or unassigned. For unassigned genes, run Liftoff restricted to gene features to propose a candidate locus.  
-2. For each projected gene pair, extract human transcript sequences with gffread and the chimpanzee ortholog locus sequence (± \~10 kb margin) from the assembly.  
-3. Splice-align each human transcript to its target locus (`minimap2 -ax splice:hq`, optionally guided by chimpanzee junctions from goal 1), and convert alignments to GTF exon chains in chimpanzee coordinates. For 1:many orthologs, align to all candidate loci and keep the best-scoring placement; report ties.  
-4. Match the projected human transcript models against the goal 1 unified set restricted to the same locus with isomatch, treating the projection as an additional tracked sample.  
-5. Classify each human transcript as: identical intron chain, compatible (ISM/contained), structurally divergent, unalignable within the locus, or no ortholog gene (lift-only or unplaced).
+1. **Optional sequence-conservation screen**  
+   * Extract human transcript cDNAs with `gffread`.  
+   * Use `BBSketch` or a similar method to estimate human–chimpanzee sequence conservation.  
+   * Use this as a QC/sanity check rather than the formal transcript-matching criterion.  
+2. **Build the human–chimpanzee gene projection table**  
+   * Map GENCODE genes to Entrez GeneIDs.  
+   * Retrieve chimpanzee orthologs from NCBI.  
+   * Classify gene relationships as:  
+     * 1:1 ortholog  
+     * 1 / complex  
+     * No assigned ortholog  
+   * For genes without an NCBI ortholog, use `Liftoff` as a lower-confidence fallback.  
+3. **Project human transcripts onto chimpanzee loci**  
+   * Extract human transcript sequences and their corresponding chimpanzee ortholog loci.  
+   * Splice-align human transcripts to the assigned chimpanzee locus using `minimap2`.  
+   * Convert the alignments into projected chimpanzee-coordinate GTF transcript models.  
+   * Record alignment identity, coverage, MAPQ, and other basic QC metrics.  
+4. **Compare projected transcripts with Goal 1 annotations**  
+   * Compare projected human transcript models against the unified chimpanzee GTF using `isomatch`.  
+   * Use **intron-chain/splice-structure similarity as the primary comparison**.  
+   * Classify transcripts into categories such as:  
+     * Exact intron-chain match  
+     * Same splice structure with different transcript ends  
+     * Compatible / contained  
+     * Structurally divergent  
+     * Projected but no annotated chimpanzee isoform  
+     * Unalignable / no gene anchor  
+5. **Summarize and validate**  
+   * Calculate the proportion of human transcripts with conserved chimpanzee counterparts.  
+   * Summarize structural-match categories and alignment identity/coverage.  
+   * Report transcripts without a counterpart and the reason for failure.
 
-Goal 3 Steps: Numrah 
+**Output**
 
-## **Stage 0: Fast sequence-conservation screen :** For every human transcript, estimate whether there is substantial homologous sequence in the chimpanzee genome and generate an intuitive “highly conserved versus divergent/unmapped” overview.
-
-**Stage 0 steps** 
-
-1. Extract all human transcript cDNAs from GENCODE using `gffread`.  
-2. Optionally create separate FASTA sets for:  
-   * All transcripts.  
-   * Canonical/MANE Select transcripts only.  
-   * CDS-only sequences.  
-   * Full spliced cDNAs including UTRs.  
-3. Run BBSketch or a comparable k-mer screen against the chimpanzee genome/locus database.  
-4. Record:  
-   * Fraction of human transcripts with high k-mer similarity.  
-   * Distribution of estimated sequence identity/shared k-mers.  
-   * Results stratified by transcript type: protein-coding, lncRNA, pseudogene, retained-intron transcript, canonical/MANE.  
-5. Use this only to prioritize or flag difficult genes; do not classify “no perfect BBSketch match” as chimpanzee absence.
-
-A perfect full-length cDNA match is too strict for cross-species transcript correspondence. More important, the biological question is whether the transcript has the same splice structure at its orthologous genomic locus, not whether every base including UTRs matches perfectly. For a smaller, controlled set of canonical transcripts, BBSketch can be a useful “sanity plot,” but the formal comparison should rely on splice-aware placement plus intron-chain comparison.
-
-**Stage 0 Output.**
-
-1. A human ↔ chimpanzee transcript correspondence table: human transcript → chimpanzee transcript(s), gene anchor and its provenance (NCBI ortholog vs Liftoff fallback), match category, alignment identity/coverage.  
-2. The projected human transcript models in chimpanzee coordinates (GTF), reusable as an additional annotation source.  
-3. A summary of human transcripts with no chimpanzee counterpart, stratified by reason (no ortholog gene / lift-only locus / unalignable / structurally divergent).
-
-## **Stage 1: Build the gene-projection table**
-
-## 1\. Map human annotation to orthology IDs
-
-* Extract human gene and transcript records from GENCODE.  
-* Join GENCODE genes to Entrez GeneIDs.  
-* Retrieve NCBI chimpanzee ortholog assignments for human GeneIDs.  
-* Join NCBI chimp GeneIDs to the RefSeq/Goal 1 chimpanzee annotation.
-
-## 2\. Classify each human gene
-
-Assign one mutually exclusive gene-anchor category:
-
-| Gene-anchor category | Definition | Downstream action |
-| ----- | ----- | ----- |
-| High-confidence 1:1 ortholog | One human GeneID maps to one chimp GeneID | Primary analysis set |
-| One-to-many ortholog | One human gene maps to multiple chimp loci | Evaluate each locus; retain best and report ties |
-| Many-to-one / complex | Multiple human genes converge on a chimp gene or complex orthology | Flag; analyze conservatively |
-| Chimp ortholog exists but absent from Goal 1 GTF | Ortholog table identifies locus but annotation is incomplete | Use locus sequence; report annotation absence |
-| No NCBI ortholog | No assigned chimpanzee ortholog | Liftoff fallback, lower confidence |
-| Mapping failure | Human GENCODE gene cannot be linked to GeneID | Retain separately; symbol-based rescue only if unambiguous |
-
-## **Stage 2: Prepare transcript and locus sequence sets**
-
-## For each gene anchor
-
-1. Extract all human transcript models for the human gene from GENCODE.  
-2. Extract transcript cDNA FASTA with `gffread`.  
-3. Extract the chimpanzee genomic locus:  
-   * Ortholog gene body.  
-   * Add a flank, initially ±10 kb.  
-   * Expand adaptively if a transcript aligns near a locus boundary or has unaligned terminal sequence.  
-4. Extract Goal 1 chimpanzee transcript models overlapping the same gene/locus.  
-5. Keep transcript biotype, CDS status, canonical/MANE flags, and UTR/CDS exon coordinates.
-
-## **Stage 3: Splice-project human isoforms onto chimpanzee loci**
-
-For each human transcript cDNA:
-
-1. Align to the pre-established chimpanzee ortholog locus using splice-aware minimap2.  
-2. Use `splice:hq` for high-quality full-length cDNA / Iso-Seq-like query sequences.  
-3. Preserve secondary alignments only where needed to resolve duplicated exons or 1:many orthologs.  
-4. Retain alignment metrics:  
-   * MAPQ.  
-   * Primary versus secondary status.  
-   * Aligned query coverage.  
-   * Reference coverage.  
-   * Number of aligned exons.  
-   * Number and length of indels.  
-   * Per-exon alignment identity.  
-   * Splice-junction motif and confidence.  
-   * Soft-clipped 5′ and 3′ sequence.
-
-Minimap2 supports splice-aware mapping of cDNA and long RNA sequences; its documented high-quality splice preset is `-ax splice:hq` with `-uf` for PacBio Iso-Seq/traditional cDNA orientation.[github](https://github.com/lh3/minimap2)
-
-## **Convert alignments to projected GTF models**
-
-For each accepted primary placement:
-
-* Convert CIGAR `N` operations into introns.  
-* Convert aligned blocks into exon intervals.  
-* Assign projected transcript IDs such as:
-
-text
-
-`HUMANPROJ_<ENST>__to__<chimp_gene_id>`
-
-* Retain alignment metadata in GTF attributes:  
-  * `human_transcript_id`  
-  * `human_gene_id`  
-  * `chimp_gene_id`  
-  * `orthology_source`  
-  * `mapq`  
-  * `qcov`  
-  * `identity`  
-  * `alignment_status`
-
-## **Stage 4: Compare projected and chimpanzee isoforms** Primary structural comparison: intron-chain logic
-
-For each projected human transcript, identify all chimpanzee Goal 1 transcripts at the anchored locus and classify:
-
-| Transcript match class | Operational definition |
-| ----- | ----- |
-| Exact intron-chain match | Same ordered intron coordinates and same strand; terminal exon differences reported separately |
-| Exact splice structure, variable ends | Same intron chain, but different TSS and/or TES boundaries |
-| Compatible / contained | One intron chain is a contiguous subset of the other; likely ISM, truncation, or incomplete annotation |
-| Junction overlap, divergent structure | Shares one or more junctions but has added, skipped, shifted, or mutually exclusive exons |
-| Sequence-supported but no annotated chimp isoform | Human projection is coherent but has no Goal 1 structural match |
-| Locus-aligned but structurally ambiguous | Poor edge confidence, short exon ambiguity, or competing splice placement |
-| Unalignable in ortholog locus | No sufficient placement to form a projection |
-| No gene anchor | No NCBI ortholog and no accepted Liftoff placement |
-
-## **Secondary sequence comparison**
-
-For the best structural match and/or all plausible matches, calculate:
-
-* Full-cDNA alignment identity and coverage.  
-* CDS-only identity and coverage for protein-coding transcripts.  
-* Number of splice-junction substitutions or shifts.  
-* 5′ and 3′ end differences separately.
-
-## **Stage 5: QC and validation \- TBD** 
+1. A **human ↔ chimpanzee transcript correspondence table** containing gene anchor, chimpanzee transcript match, structural category, alignment identity, and coverage.  
+2. Human transcript projections in **chimpanzee coordinates (GTF)**.  
+3. Summary statistics/figures showing:  
+   * Conserved versus divergent transcript structures  
+   * Distribution of sequence identity/coverage  
+   * Human transcripts without a chimpanzee counterpart, stratified by reason.
 
