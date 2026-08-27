@@ -10,15 +10,15 @@ The chimpanzee (*Pan troglodytes*) is a key species for comparative and evolutio
 
 This project addresses all three gaps, as three goals:
 
-1. **Annotation integration.** Merge the major public chimpanzee annotations into a single unified transcript set, and quantify how much they agree and disagree.  
-2. **Population-scale isoform index.** Build a read-level index of transcript evidence from public long-read RNA-seq, so that any transcript can be queried for its population frequency and the samples supporting it.  
-3. **Human–chimpanzee correspondence.** Map human transcripts onto the chimpanzee assembly and match them against the unified set, so human and chimpanzee isoforms can be compared directly.
+1. **Annotation integration:** Merge the major public chimpanzee annotations into a single unified transcript set, and quantify how much they agree and disagree.  
+2. **Population-scale isoform index:** Build a read-level index of transcript evidence from public long-read RNA-seq, so that any transcript can be queried for its population frequency and the samples supporting it.  
+3. **Human–chimpanzee correspondence:** Map human transcripts onto the chimpanzee assembly and match them against the unified set, so human and chimpanzee isoforms can be compared directly.
 
 The result is a reference transcript set, a queryable population-frequency index, and a human–chimpanzee transcript correspondence table — together letting other groups assess the prevalence of transcripts they detect in their own chimpanzee samples and relate them to human isoforms.
 
-goals 1 and 2 are independent and run in parallel. goal 3 depends on the goal 1 output.
+Goals 1 and 2 are independent and run in parallel while goal 3 depends on the output of goal 1.
 
-flowchart
+Flowchart
 
 ![](flowchart.png)
 
@@ -40,65 +40,65 @@ All work is anchored to a single assembly to avoid coordinate mismatches:
 
 ---
 
-## **goal 1 — Chimpanzee annotation integration**
+## **Goal 1 — Chimpanzee annotation integration**
 
-**Goal.** Produce a unified transcript set from multiple reference annotations, and systematically characterise where those annotations agree and where they diverge.
+**Goal:** Produce a unified transcript set from multiple reference annotations, and systematically characterize where those annotations agree and where they diverge.
 
-**Input.**
+**Input**
 
 * NCBI RefSeq annotation (release RS\_2026\_05): `https://ftp.ncbi.nlm.nih.gov/genomes/all/annotation_releases/9598/GCF_028858775.2-RS_2026_05/GCF_028858775.2_NHGRI_mPanTro3-v2.1_pri_genomic.gtf.gz`  
 * Ensembl annotation (geneset 2025\_05, on GCA\_028858775.3): `https://ftp.ebi.ac.uk/pub/ensemblorganisms/Pan_troglodytes/GCA_028858775.3/ensembl/geneset/2025_05/genes.gtf.gz`  
 * Reference genome FASTA and chromAlias table (above)  
 * `isomatch` — https://github.com/zhengxinchang/isomatch
 
-**Steps.**
+**Steps**
 
 1. Normalise sequence names in both GTFs and in the genome FASTA to the project convention using the chromAlias table.  
 2. Merge with `isomatch`, treating each annotation source as a tracked sample.  
 3. Summarise the merge: transcripts unique to each source, shared transcripts, and the nature of the disagreements (exact intron-chain match vs. shared structure with different transcript boundaries).
 
-**Output.**
+**Output**
 
 1. A unified chimpanzee transcript set (GTF) with provenance for every transcript.  
 2. Cross-annotation comparison figures — an UpSet plot (or Venn diagram) of transcript overlap between sources, plus a short summary table of per-source counts.
 
 ---
 
-## **goal 2 — Read-level, population-scale isoform index**
+## **Goal 2 — Read-level, population-scale isoform index**
 
-**Goal.** Build an index of transcript evidence at the level of individual long reads, aggregated across all publicly available chimpanzee long-read RNA-seq samples, supporting population-frequency queries for arbitrary query transcripts.
+**Goal:** Build an index of transcript evidence at the level of individual long reads, aggregated across all publicly available chimpanzee long-read RNA-seq samples, supporting population-frequency queries for arbitrary query transcripts.
 
-**Input.**
+**Input**
 
 * Public chimpanzee long-read RNA-seq runs from SRA, as a fixed list of run accessions (BioProject IDs and the accession list are recorded in the project repository; session links to the SRA Run Selector are not stable and are not used)  
 * Reference genome, normalised as above  
 * `isopedia` — https://github.com/zhengxinchang/isopedia
 
-**Steps.**
+**Steps**
 
 1. Assemble the run accession list with sample metadata (tissue, individual, platform, library protocol).  
 2. Align reads to the reference assembly.  
 3. Build the `isopedia` index over the aligned reads, retaining per-sample provenance.  
 4. Validate with a query round-trip: take transcripts from the goal 1 unified set and confirm the index returns sensible support counts and sample lists.
 
-**Output.**
+**Output**
 
 1. A chimpanzee read-level `isopedia` index supporting transcript queries that return population frequency and the list of supporting samples.  
 2. The curated SRA run/sample metadata table used to build it.
 
 ---
 
-## goal 3 — Human–chimpanzee transcript correspondence (gene-anchored)
+## Goal 3 — Human–chimpanzee transcript correspondence (gene-anchored)
 
-**Goal.** Establish a transcript-level correspondence between the human reference annotation and the chimpanzee transcript set on NHGRI\_mPanTro3-v2.1\_pri, so that human and chimpanzee isoforms can be compared directly.
+**Goal:** Establish a transcript-level correspondence between the human reference annotation and the chimpanzee transcript set on NHGRI\_mPanTro3-v2.1\_pri, so that human and chimpanzee isoforms can be compared directly.
 
 No precomputed transcript-level mapping is usable here (TOGA and UCSC chains target panTro6 / Clint\_PTRv2). However, gene-level orthology *is* available: NCBI's annotation pipeline assigns human orthologs to the RefSeq annotation of GCF\_028858775.2. The strategy is therefore two-stage: first fix the correspondence at the gene level, then compare transcript structures within each orthologous gene pair.
 
-**Approach.** Stage 1 (gene projection): anchor each human gene to its chimpanzee ortholog using the NCBI RefSeq ortholog assignments (harmonised GeneIDs / gene symbols), classifying pairs as 1:1, 1:many, or unassigned. For unassigned human genes, fall back to Liftoff to propose a candidate locus, flagged as projection-by-lift (lower confidence). Stage 2 (within-gene transcript comparison): splice-align the human transcript sequences of each gene onto its chimpanzee ortholog locus, convert the alignments to exon models in chimpanzee coordinates, and match them against the goal 1 unified chimpanzee transcripts at that locus using the same intron-chain logic (isomatch). Intron-chain identity is the primary criterion; cDNA alignment identity and coverage are recorded as supporting statistics, since sequence identity alone cannot distinguish splice-structure differences.
+**Approach:** Stage 1 (gene projection): anchor each human gene to its chimpanzee ortholog using the NCBI RefSeq ortholog assignments (harmonised GeneIDs / gene symbols), classifying pairs as 1:1, 1:many, or unassigned. For unassigned human genes, fall back to Liftoff to propose a candidate locus, flagged as projection-by-lift (lower confidence). Stage 2 (within-gene transcript comparison): splice-align the human transcript sequences of each gene onto its chimpanzee ortholog locus, convert the alignments to exon models in chimpanzee coordinates, and match them against the goal 1 unified chimpanzee transcripts at that locus using the same intron-chain logic (isomatch). Intron-chain identity is the primary criterion; cDNA alignment identity and coverage are recorded as supporting statistics, since sequence identity alone cannot distinguish splice-structure differences.
 
 Because every alignment is confined to a pre-established ortholog locus, paralog mis-mapping is excluded by construction, and every failure is attributable to a specific cause (no ortholog gene, unalignable transcript, or structural divergence).
 
-**Input.**
+**Input**
 
 * Human reference annotation (GENCODE comprehensive GTF) and GRCh38 primary assembly FASTA: [https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode\_human/latest\_release/](https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/latest_release/)  
 * NCBI RefSeq annotation and gene-level ortholog assignments for GCF\_028858775.2 (via NCBI Datasets ortholog query); GENCODE↔GeneID cross-references  
@@ -106,7 +106,7 @@ Because every alignment is confined to a pre-established ortholog locus, paralog
 * Unified chimpanzee transcript set from goal 1  
 * gffread, minimap2, Liftoff (fallback only), isomatch
 
-**Steps.**
+**Steps**
 
 1. Build the gene projection table: human GeneID ↔ chimpanzee GeneID from NCBI orthologs; map GENCODE gene IDs to Entrez GeneIDs; classify each human gene as 1:1, 1:many, or unassigned. For unassigned genes, run Liftoff restricted to gene features to propose a candidate locus.  
 2. For each projected gene pair, extract human transcript sequences with gffread and the chimpanzee ortholog locus sequence (± \~10 kb margin) from the assembly.  
