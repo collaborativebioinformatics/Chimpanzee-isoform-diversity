@@ -50,7 +50,7 @@ All work is anchored to a single assembly to avoid coordinate mismatches:
 * Reference genome FASTA and chromAlias table (above)  
 * `isomatch` — https://github.com/zhengxinchang/isomatch
 
-**Steps.**
+**Steps**
 
 1. **Download the inputs**  
    1. NCBI RefSeq GTF  
@@ -95,8 +95,7 @@ All work is anchored to a single assembly to avoid coordinate mismatches:
 * Reference genome, normalised as above  
 * `isopedia` — https://github.com/zhengxinchang/isopedia
 
-
-**Steps.**
+**Steps**
 
 1. **Curate chimpanzee long-read RNA-seq datasets**  
    1. Combine SRA run information with sample metadata.  
@@ -138,10 +137,7 @@ All work is anchored to a single assembly to avoid coordinate mismatches:
 
 ## Goal 3 — Human–chimpanzee transcript correspondence (gene-anchored)
 
-**Goal**
-
-Establish a **transcript-level correspondence between human and chimpanzee isoforms** on `NHGRI_mPanTro3-v2.1_pri`.
-
+**Goal**: Establish a **transcript-level correspondence between human and chimpanzee isoforms** on `NHGRI_mPanTro3-v2.1_pri`.
 The analysis is **gene-anchored**: first identify the corresponding chimpanzee gene/locus for each human gene, then compare transcript structures within that locus. Splice-structure similarity is the primary criterion, while sequence identity and coverage are used as supporting information.
 
 **Input**
