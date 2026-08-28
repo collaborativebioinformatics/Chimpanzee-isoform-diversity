@@ -315,6 +315,25 @@ The Ensembl transcript annotation (102,140 transcript models) was queried agains
 ![Transcript discovery saturation](figures/goal2_discovery_saturation.png) 
 
 
+
+
+## Presentation
+
+![](./slides/Slide1.jpeg)
+
+---
+![](./slides/Slide2.jpeg)
+
+---
+![](./slides/Slide3.jpeg)
+
+---
+![](./slides/Slide4.jpeg)
+
+---
+![](./slides/Slide5.jpeg)
+
+
 ## Team
 
 - Xinchang Zheng
