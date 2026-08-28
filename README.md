@@ -340,6 +340,8 @@ Since every alignment in the following stages is confined to a pre-established o
 
 ## Presentation
 
+https://docs.google.com/presentation/d/1652ACNfKNP-Lszs3GGba00wYlToAjHXfQ3Shde4UDLc/edit?usp=sharing
+
 ![](./slides/Slide1.jpeg)
 
 ---
