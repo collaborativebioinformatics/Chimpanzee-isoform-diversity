@@ -17,6 +17,82 @@ The result is a reference transcript set, a queryable population-frequency index
 
 Goals 1 and 2 are independent and run in parallel while goal 3 depends on the output of goal 1.
 
+Quick Access
+Reference
+Resource	Description	Link
+Chimpanzee reference genome	NHGRI_mPanTro3-v2.1_pri	FASTA
+Chromosome alias table	RefSeq / GenBank / UCSC name conversion	chromAlias
+Chimpanzee annotations
+Resource	Version	Link
+NCBI RefSeq	RS_2026_05	RefSeq GTF
+Ensembl	geneset 2025_05	Ensembl GTF
+Core analysis tools
+Tool	Main use	Link
+IsoMatch	Transcript annotation merging and structural comparison	GitHub
+Isopedia	Read-level transcript evidence and population indexing	GitHub
+minimap2	Splice-aware long-read alignment	GitHub
+samtools	BAM processing and indexing	Website
+gffread	GTF/GFF processing and transcript extraction	GitHub
+Liftoff	Gene/transcript projection between assemblies	GitHub
+BBSketch	Optional sequence-conservation screening	—
+Human resources
+Resource	Main use	Link
+GENCODE	Human transcript annotation	GENCODE
+GRCh38	Human reference genome	—
+NCBI Gene	Gene identifiers and orthology	NCBI Gene
+Sequencing data
+
+NCBI Sequence Read Archive (SRA) provides the public chimpanzee long-read RNA-seq datasets used for population-scale transcript evidence.
+
+NCBI SRA
+
+Resources
+Reference genome
+
+All IsoChimp analyses are anchored to:
+
+Assembly: NHGRI_mPanTro3-v2.1_pri
+RefSeq accession: GCF_028858775.2
+GenBank accession: GCA_028858775.3
+Genome FASTA
+
+Download chimpanzee reference genome
+
+Chromosome alias table
+
+Download chromAlias table
+
+The alias table maps chromosome names between RefSeq, GenBank, and UCSC conventions.
+
+Chimpanzee annotation resources
+NCBI RefSeq
+
+Release: RS_2026_05
+
+RefSeq chimpanzee GTF
+
+Ensembl
+
+Geneset: 2025_05
+Assembly: GCA_028858775.3
+
+Ensembl chimpanzee GTF
+
+Human annotation resources
+GENCODE: Human comprehensive transcript annotation
+https://www.gencodegenes.org/
+GRCh38: Human reference assembly
+NCBI Gene: Gene identifiers and human–chimpanzee orthology
+https://www.ncbi.nlm.nih.gov/gene/
+Sequencing resources
+NCBI Sequence Read Archive
+
+Public chimpanzee long-read RNA-seq datasets were curated from SRA.
+
+NCBI SRA
+
+The final analysis cohort contains 57 validated long-read RNA-seq samples.
+
 Flowchart
 
 ![](flowchart.png)
