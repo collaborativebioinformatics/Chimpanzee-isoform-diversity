@@ -313,3 +313,18 @@ The Ensembl transcript annotation (102,140 transcript models) was queried agains
 **Discovery saturation.** Samples were added in 300 deterministic random orders; the line shows the mean cumulative number of detected transcripts at each cohort size and the shaded band the 2.5th–97.5th percentile interval. The curve continues to rise at 57 samples — the cumulative discovery set (47,575 transcripts) is not yet saturated, indicating that additional samples would still reveal new supported isoforms.
 
 ![Transcript discovery saturation](figures/goal2_discovery_saturation.png) 
+
+
+## Team
+
+- Xinchang Zheng
+- Numrah Fadra
+- Md Shakhaowat Hossain
+- Muteeba Azhar
+- Nilabja Bhattacharjee
+- Rojina Sapkota
+- Umran Yaman
+- Amit Shenoy
+- Hannah Chang
+- Aisha Yousaf
+- Rajarshi Mondal
