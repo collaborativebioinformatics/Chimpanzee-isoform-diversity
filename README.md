@@ -314,7 +314,28 @@ The Ensembl transcript annotation (102,140 transcript models) was queried agains
 
 ![Transcript discovery saturation](figures/goal2_discovery_saturation.png) 
 
+---
 
+### **Goal 3 — Human–chimpanzee transcript correspondence**
+
+Because no usable precomputed transcript-level mapping exists for `NHGRI_mPanTro3-v2.1_pri` (TOGA and UCSC chains target panTro6 / Clint_PTRv2), the correspondence is established in two stages: first anchor each human gene to a chimpanzee ortholog locus, then compare transcript structures within each anchored pair. Results below cover the sequence-conservation screen (Stage 0) and the gene-projection table (Stage 1); transcript projection and intron-chain matching (Stages 2–4) are in progress.
+
+**Sequence-conservation screen.** Human transcript cDNAs extracted from GENCODE were screened against the chimpanzee genome with a k-mer sketch comparison and binned as highly conserved, conserved, divergent, or no hit. Protein-coding and MANE Select transcripts are almost entirely conserved or highly conserved, and their identity to the best chimpanzee transcript concentrates above 97.5%. lncRNAs and pseudogenes carry the large majority of divergent and no-hit calls. This screen is used to prioritise and flag difficult genes only — the absence of a k-mer match is not treated as evidence that a transcript is absent in chimpanzee, since the formal criterion is splice-structure agreement at the orthologous locus rather than full-length cDNA identity.
+
+![Human transcript conservation screen against the chimpanzee genome](figures/goal3_conservation_screen.png)
+
+**Gene-anchor outcomes.** NCBI ortholog assignments for the chimpanzee RefSeq annotation (GCF_028858775.2, RS_2026_05) provided 17,903 human–chimpanzee ortholog pairs, all strictly one-to-one by construction, anchoring 17,910 human genes. Coverage is strongly biotype-dependent: 17,869 of 20,107 protein-coding genes (88.9%) received a unique chimpanzee locus, whereas the unanchored remainder is overwhelmingly non-coding. Genes with no NCBI ortholog assignment (28,156 total, 1,667 protein-coding) and genes that could not be linked to an Entrez GeneID (32,650 total, 560 protein-coding — predominantly lncRNAs and pseudogenes) were not projected. Six anchored genes fall in loci that lack transcript models in the chimpanzee annotation.
+
+| Orthology class | lncRNA | other | protein_coding | pseudogene | Total |
+| ----- | ----: | ----: | ----: | ----: | ----: |
+| One-to-one ortholog | 31 | 0 | 17,869 | 10 | 17,910 |
+| Ortholog not in RefSeq GTF | 4 | 0 | 5 | 2 | 11 |
+| Ortholog absent from annotation | 0 | 0 | 6 | 0 | 6 |
+| No NCBI ortholog | 8,838 | 6,186 | 1,667 | 11,465 | 28,156 |
+| GeneID mapping failure | 25,993 | 2,375 | 560 | 3,722 | 32,650 |
+| **Total** | **34,866** | **8,561** | **20,107** | **15,199** | **78,733** |
+
+Since every alignment in the following stages is confined to a pre-established ortholog locus, paralog mis-mapping is excluded by construction and each failure is attributable to a specific cause — no ortholog gene, unalignable transcript, or structural divergence.
 
 
 ## Presentation
