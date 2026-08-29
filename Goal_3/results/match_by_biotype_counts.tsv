@@ -1,0 +1,7 @@
+biotype_coarse	exact_intron_chain	same_chain_variable_ends	compatible_contained	not_annotated_known_junctions	not_annotated_novel_junctions	divergent_structure	no_annotated_chimp_isoform	locus_aligned_ambiguous	unalignable_in_locus	no_gene_anchor
+lncRNA	5	11	20	23	222	0	20	0	74	188761
+nonsense_mediated_decay	1029	1960	1540	20311	62053	0	426	0	1088	3411
+other	35	273	4220	2493	15906	0	1333	0	1378	9781
+protein_coding	12710	37710	25802	46415	139147	0	3223	0	3342	10106
+pseudogene	0	2	3	0	4	0	0	0	1	15192
+retained_intron	14	93	21200	5320	4951	0	528	0	157	1987

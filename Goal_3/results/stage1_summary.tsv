@@ -1,0 +1,7 @@
+orthology_class	lncRNA	other	protein_coding	pseudogene	total
+mapping_failure	25993	2375	560	3722	32650
+no_ncbi_ortholog	8838	6186	1667	11465	28156
+one_to_one	31	0	17869	10	17910
+ortholog_not_in_refseq_gtf	4	0	5	2	11
+ortholog_absent_from_annotation	0	0	6	0	6
+TOTAL	34866	8561	20107	15199	78733

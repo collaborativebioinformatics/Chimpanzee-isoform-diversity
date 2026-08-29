@@ -1,0 +1,11 @@
+splice_match_category	count
+exact_intron_chain	13793
+same_chain_variable_ends	40049
+compatible_contained	52785
+not_annotated_known_junctions	74562
+not_annotated_novel_junctions	222283
+divergent_structure	0
+no_annotated_chimp_isoform	5530
+locus_aligned_ambiguous	0
+unalignable_in_locus	6040
+no_gene_anchor	229250

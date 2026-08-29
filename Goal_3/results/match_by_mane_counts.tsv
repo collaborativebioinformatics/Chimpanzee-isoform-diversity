@@ -1,0 +1,4 @@
+human_canonical_or_mane_status	exact_intron_chain	same_chain_variable_ends	compatible_contained	not_annotated_known_junctions	not_annotated_novel_junctions	divergent_structure	no_annotated_chimp_isoform	locus_aligned_ambiguous	unalignable_in_locus	no_gene_anchor
+Ensembl_canonical	9	17	14	4	38	0	6	0	9	59337
+MANE_Select	4154	10242	1129	241	1707	0	199	0	147	1480
+other	9630	29790	51642	74317	220538	0	5325	0	5884	168433

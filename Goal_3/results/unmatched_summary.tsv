@@ -1,0 +1,7 @@
+splice_match_category	lncRNA	nonsense_mediated_decay	other	protein_coding	pseudogene	retained_intron	total	pct_of_all_tx
+not_annotated_known_junctions	23.0	20311.0	2493.0	46415.0	0.0	5320.0	74562.0	11.6
+not_annotated_novel_junctions	222.0	62053.0	15906.0	139147.0	4.0	4951.0	222283.0	34.5
+no_annotated_chimp_isoform	20.0	426.0	1333.0	3223.0	0.0	528.0	5530.0	0.9
+unalignable_in_locus	74.0	1088.0	1378.0	3342.0	1.0	157.0	6040.0	0.9
+no_gene_anchor	188761.0	3411.0	9793.0	10106.0	15192.0	1987.0	229250.0	35.6
+TOTAL_unmatched	189100.0	87289.0	30903.0	202233.0	15197.0	12943.0	537665.0	83.5
